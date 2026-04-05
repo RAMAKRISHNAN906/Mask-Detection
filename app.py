@@ -38,6 +38,11 @@ app.secret_key = "facemask_detection_secret_2024"
 app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
 CORS(app)
 
+# Create required directories (runs under gunicorn too)
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+os.makedirs("models", exist_ok=True)
+
 # Initialize database
 init_db()
 
