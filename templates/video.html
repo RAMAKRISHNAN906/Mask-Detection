@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+{% block title %}Video Detection{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container">
+        <div class="page-header animate-on-scroll">
+            <span class="section-badge"><i class="fas fa-film"></i> Video Analysis</span>
+            <h1 class="page-title">Video <span class="gradient-text">Mask Detection</span></h1>
+            <p class="page-subtitle">Upload a video file for frame-by-frame mask detection analysis</p>
+        </div>
+
+        <div class="upload-layout">
+            <!-- Upload Panel -->
+            <div class="upload-panel glass-card animate-on-scroll">
+                <div class="upload-zone" id="video-drop-zone">
+                    <input type="file" id="video-input" accept=".mp4,.avi,.mov,.mkv,.webm" hidden>
+                    <div class="upload-icon">
+                        <i class="fas fa-film"></i>
+                    </div>
+                    <h3>Drop Video Here</h3>
+                    <p>or click to browse files</p>
+                    <span class="upload-formats">MP4, AVI, MOV, MKV, WebM supported (max 100MB)</span>
+                </div>
+
+                <div class="video-preview" id="video-preview" style="display:none;">
+                    <div class="preview-header">
+                        <h3><i class="fas fa-film"></i> Selected Video</h3>
+                        <button class="btn btn-sm btn-outline" onclick="clearVideo()">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    </div>
+                    <video id="preview-video" controls></video>
+                    <div class="video-info" id="video-info"></div>
+                </div>
+
+                <button class="btn btn-primary btn-glow btn-block" id="btn-process" onclick="processVideo()" disabled>
+                    <i class="fas fa-cog"></i> Process Video
+                </button>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="result-panel animate-on-scroll">
+                <!-- Processing -->
+                <div class="processing-overlay" id="video-processing" style="display:none;">
+                    <div class="processing-content glass-card">
+                        <div class="processing-spinner"></div>
+                        <h3>Processing Video...</h3>
+                        <p>This may take a few minutes depending on video length</p>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="video-progress">
+                                <div class="progress-fill"></div>
+                            </div>
+                            <span class="progress-text" id="progress-text">Analyzing frames...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div id="video-results" style="display:none;">
+                    <div class="result-image-card glass-card">
+                        <div class="result-header">
+                            <h3><i class="fas fa-check-double"></i> Processing Complete</h3>
+                            <a id="video-download-btn" class="btn btn-sm btn-primary" download>
+                                <i class="fas fa-download"></i> Download Video
+                            </a>
+                        </div>
+                        <div class="video-result-summary">
+                            <div class="result-icon-big success">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <h2>Video Processed Successfully</h2>
+                        </div>
+                    </div>
+
+                    <!-- Video Stats -->
+                    <div class="result-stats" id="video-stats">
+                        <div class="stat-mini glass-card">
+                            <div class="stat-mini-icon" style="--accent: #00f0ff;">
+                                <i class="fas fa-film"></i>
+                            </div>
+                            <div class="stat-mini-info">
+                                <span class="stat-mini-value" id="vid-frames">0</span>
+                                <span class="stat-mini-label">Frames</span>
+                            </div>
+                        </div>
+                        <div class="stat-mini glass-card">
+                            <div class="stat-mini-icon" style="--accent: #a855f7;">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-mini-info">
+                                <span class="stat-mini-value" id="vid-faces">0</span>
+                                <span class="stat-mini-label">Total Faces</span>
+                            </div>
+                        </div>
+                        <div class="stat-mini glass-card">
+                            <div class="stat-mini-icon" style="--accent: #10b981;">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-mini-info">
+                                <span class="stat-mini-value" id="vid-masks">0</span>
+                                <span class="stat-mini-label">With Mask</span>
+                            </div>
+                        </div>
+                        <div class="stat-mini glass-card">
+                            <div class="stat-mini-icon" style="--accent: #f43f5e;">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                            <div class="stat-mini-info">
+                                <span class="stat-mini-value" id="vid-nomasks">0</span>
+                                <span class="stat-mini-label">No Mask</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="confidence-card glass-card">
+                        <h3><i class="fas fa-gauge-high"></i> Average Confidence</h3>
+                        <div class="confidence-big" id="vid-confidence">0%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const videoDropZone = document.getElementById('video-drop-zone');
+const videoInput = document.getElementById('video-input');
+const videoPreview = document.getElementById('video-preview');
+const btnProcess = document.getElementById('btn-process');
+let selectedVideo = null;
+
+videoDropZone.addEventListener('click', () => videoInput.click());
+videoDropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    videoDropZone.classList.add('drag-over');
+});
+videoDropZone.addEventListener('dragleave', () => videoDropZone.classList.remove('drag-over'));
+videoDropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    videoDropZone.classList.remove('drag-over');
+    if (e.dataTransfer.files.length) handleVideoFile(e.dataTransfer.files[0]);
+});
+videoInput.addEventListener('change', (e) => {
+    if (e.target.files.length) handleVideoFile(e.target.files[0]);
+});
+
+function handleVideoFile(file) {
+    if (!file.type.startsWith('video/') && !file.name.match(/\.(mp4|avi|mov|mkv|webm)$/i)) {
+        showToast('Please select a valid video file', 'error');
+        return;
+    }
+    if (file.size > 100 * 1024 * 1024) {
+        showToast('File too large. Maximum size is 100MB', 'error');
+        return;
+    }
+    selectedVideo = file;
+    const previewEl = document.getElementById('preview-video');
+    previewEl.src = URL.createObjectURL(file);
+    document.getElementById('video-info').innerHTML = `
+        <span><i class="fas fa-file"></i> ${file.name}</span>
+        <span><i class="fas fa-weight"></i> ${(file.size / (1024 * 1024)).toFixed(1)} MB</span>
+    `;
+    videoPreview.style.display = 'block';
+    videoDropZone.style.display = 'none';
+    btnProcess.disabled = false;
+    gsap.from(videoPreview, { opacity: 0, y: 20, duration: 0.5 });
+}
+
+function clearVideo() {
+    selectedVideo = null;
+    videoPreview.style.display = 'none';
+    videoDropZone.style.display = 'flex';
+    btnProcess.disabled = true;
+    document.getElementById('video-results').style.display = 'none';
+    videoInput.value = '';
+}
+
+async function processVideo() {
+    if (!selectedVideo) return;
+
+    const processing = document.getElementById('video-processing');
+    processing.style.display = 'flex';
+    btnProcess.disabled = true;
+
+    const formData = new FormData();
+    formData.append('file', selectedVideo);
+
+    try {
+        const response = await fetch('/api/detect/video', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+        processing.style.display = 'none';
+
+        if (data.error) {
+            showToast(data.error, 'error');
+            btnProcess.disabled = false;
+            return;
+        }
+
+        const results = document.getElementById('video-results');
+        document.getElementById('video-download-btn').href = data.download_url;
+        document.getElementById('vid-frames').textContent = data.total_frames;
+        document.getElementById('vid-faces').textContent = data.total_faces;
+        document.getElementById('vid-masks').textContent = data.mask_count;
+        document.getElementById('vid-nomasks').textContent = data.no_mask_count;
+        document.getElementById('vid-confidence').textContent = data.avg_confidence + '%';
+
+        results.style.display = 'block';
+        gsap.from(results.children, { opacity: 0, y: 30, duration: 0.5, stagger: 0.15 });
+
+        showToast(`Video processed: ${data.total_faces} faces detected`, 'success');
+    } catch (err) {
+        processing.style.display = 'none';
+        showToast('Processing failed: ' + err.message, 'error');
+    }
+    btnProcess.disabled = false;
+}
+</script>
+{% endblock %}

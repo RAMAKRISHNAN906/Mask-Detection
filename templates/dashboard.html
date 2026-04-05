@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container">
+        <div class="page-header animate-on-scroll">
+            <span class="section-badge"><i class="fas fa-chart-line"></i> Analytics</span>
+            <h1 class="page-title">Detection <span class="gradient-text">Dashboard</span></h1>
+            <p class="page-subtitle">Comprehensive analytics and detection history</p>
+        </div>
+
+        <!-- Top Stats -->
+        <div class="dashboard-stats animate-on-scroll">
+            <div class="dash-stat glass-card">
+                <div class="dash-stat-icon" style="background: linear-gradient(135deg, #00f0ff33, #00f0ff11);">
+                    <i class="fas fa-eye" style="color: #00f0ff;"></i>
+                </div>
+                <div class="dash-stat-info">
+                    <span class="dash-stat-value">{{ stats.total_detections }}</span>
+                    <span class="dash-stat-label">Total Detections</span>
+                </div>
+            </div>
+            <div class="dash-stat glass-card">
+                <div class="dash-stat-icon" style="background: linear-gradient(135deg, #a855f733, #a855f711);">
+                    <i class="fas fa-users" style="color: #a855f7;"></i>
+                </div>
+                <div class="dash-stat-info">
+                    <span class="dash-stat-value">{{ stats.total_faces }}</span>
+                    <span class="dash-stat-label">Faces Detected</span>
+                </div>
+            </div>
+            <div class="dash-stat glass-card">
+                <div class="dash-stat-icon" style="background: linear-gradient(135deg, #10b98133, #10b98111);">
+                    <i class="fas fa-check-circle" style="color: #10b981;"></i>
+                </div>
+                <div class="dash-stat-info">
+                    <span class="dash-stat-value">{{ stats.total_masks }}</span>
+                    <span class="dash-stat-label">Masks Detected</span>
+                </div>
+            </div>
+            <div class="dash-stat glass-card">
+                <div class="dash-stat-icon" style="background: linear-gradient(135deg, #f43f5e33, #f43f5e11);">
+                    <i class="fas fa-exclamation-triangle" style="color: #f43f5e;"></i>
+                </div>
+                <div class="dash-stat-info">
+                    <span class="dash-stat-value">{{ stats.total_no_masks }}</span>
+                    <span class="dash-stat-label">No Mask Alerts</span>
+                </div>
+            </div>
+            <div class="dash-stat glass-card">
+                <div class="dash-stat-icon" style="background: linear-gradient(135deg, #f59e0b33, #f59e0b11);">
+                    <i class="fas fa-bullseye" style="color: #f59e0b;"></i>
+                </div>
+                <div class="dash-stat-info">
+                    <span class="dash-stat-value">{{ "%.1f"|format(stats.avg_confidence * 100) }}%</span>
+                    <span class="dash-stat-label">Avg Confidence</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="charts-row">
+            <div class="chart-card glass-card animate-on-scroll">
+                <div class="chart-header">
+                    <h3><i class="fas fa-chart-pie"></i> Mask vs No Mask</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card glass-card animate-on-scroll">
+                <div class="chart-header">
+                    <h3><i class="fas fa-chart-line"></i> Daily Detections</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="lineChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Source Breakdown -->
+        <div class="chart-card glass-card full-width animate-on-scroll">
+            <div class="chart-header">
+                <h3><i class="fas fa-chart-bar"></i> Detection Sources</h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="dashboard-actions animate-on-scroll">
+            <button class="btn btn-primary btn-glow" id="btn-pdf" onclick="downloadReport()">
+                <i class="fas fa-file-pdf"></i> Generate PDF Report
+            </button>
+            <button class="btn btn-danger" onclick="clearAllLogs()">
+                <i class="fas fa-trash"></i> Clear All Logs
+            </button>
+            <button class="btn btn-outline" onclick="refreshDashboard()">
+                <i class="fas fa-sync"></i> Refresh
+            </button>
+        </div>
+
+        <!-- Detection Logs Table -->
+        <div class="logs-card glass-card animate-on-scroll">
+            <div class="chart-header">
+                <h3><i class="fas fa-table"></i> Detection Logs</h3>
+                <span class="badge">Latest {{ logs|length }}</span>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Timestamp</th>
+                            <th>Source</th>
+                            <th>Faces</th>
+                            <th>Mask</th>
+                            <th>No Mask</th>
+                            <th>Confidence</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                        <tr>
+                            <td>#{{ log.id }}</td>
+                            <td>{{ log.timestamp }}</td>
+                            <td>
+                                <span class="source-badge {{ log.source }}">
+                                    <i class="fas fa-{{ 'video' if log.source == 'webcam' else ('image' if log.source == 'image' else 'film') }}"></i>
+                                    {{ log.source|capitalize }}
+                                </span>
+                            </td>
+                            <td>{{ log.total_faces }}</td>
+                            <td><span class="text-success">{{ log.mask_count }}</span></td>
+                            <td><span class="text-danger">{{ log.no_mask_count }}</span></td>
+                            <td>{{ "%.0f"|format(log.confidence * 100) }}%</td>
+                            <td>
+                                <span class="result-badge {{ 'success' if 'Mask' in log.result and 'No' not in log.result else ('danger' if 'No Mask' in log.result else 'warning') }}">
+                                    {{ log.result }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% if not logs %}
+                        <tr>
+                            <td colspan="8" class="text-center text-muted">No detection logs yet</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+    const statsData = {{ stats|tojson }};
+    initDashboardCharts(statsData);
+
+    async function clearAllLogs() {
+        if (!confirm('Clear all detection logs?')) return;
+        try {
+            const res = await fetch('/api/dashboard/clear', { method: 'POST' });
+            const data = await res.json();
+            if (data.message) {
+                showToast('Logs cleared successfully', 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showToast(data.error || 'Failed to clear logs', 'error');
+            }
+        } catch (err) {
+            showToast('Error: ' + err.message, 'error');
+        }
+    }
+
+    function refreshDashboard() {
+        location.reload();
+    }
+
+    async function downloadReport() {
+        const btn  = document.getElementById('btn-pdf');
+        const orig = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+        try {
+            const res  = await fetch('/api/report/pdf');
+            if (!res.ok) throw new Error('Server error ' + res.status);
+            const blob = await res.blob();
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href     = url;
+            a.download = `maskguard_report_${Date.now()}.pdf`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('PDF report downloaded!', 'success');
+        } catch (err) {
+            showToast('Failed: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = orig;
+        }
+    }
+</script>
+{% endblock %}

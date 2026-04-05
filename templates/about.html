@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}About{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container">
+        <div class="page-header animate-on-scroll">
+            <span class="section-badge"><i class="fas fa-info-circle"></i> About</span>
+            <h1 class="page-title">About <span class="gradient-text">MaskGuard AI</span></h1>
+            <p class="page-subtitle">Learn about our AI-powered face mask detection system</p>
+        </div>
+
+        <div class="about-grid">
+            <div class="about-content animate-on-scroll">
+                <div class="about-card glass-card">
+                    <h2><i class="fas fa-shield-virus"></i> Our Mission</h2>
+                    <p>
+                        MaskGuard AI is an advanced face mask detection system built to help organizations
+                        and communities ensure safety compliance. Using state-of-the-art deep learning
+                        and computer vision, our system provides real-time, accurate mask detection
+                        across multiple input sources.
+                    </p>
+                    <p>
+                        Whether monitoring a live webcam feed, analyzing uploaded images, or processing
+                        video files, MaskGuard AI delivers instant, reliable results with detailed
+                        analytics and reporting capabilities.
+                    </p>
+                </div>
+
+                <div class="about-card glass-card">
+                    <h2><i class="fas fa-cogs"></i> Technology Stack</h2>
+                    <div class="tech-list">
+                        <div class="tech-list-item">
+                            <div class="tech-list-icon"><i class="fas fa-brain"></i></div>
+                            <div>
+                                <h4>MobileNetV2 Deep Learning</h4>
+                                <p>Transfer learning with MobileNetV2 architecture for efficient and accurate mask classification</p>
+                            </div>
+                        </div>
+                        <div class="tech-list-item">
+                            <div class="tech-list-icon"><i class="fas fa-eye"></i></div>
+                            <div>
+                                <h4>OpenCV Computer Vision</h4>
+                                <p>Advanced face detection using DNN module or Haar Cascades for robust face localization</p>
+                            </div>
+                        </div>
+                        <div class="tech-list-item">
+                            <div class="tech-list-icon"><i class="fab fa-python"></i></div>
+                            <div>
+                                <h4>Flask Web Framework</h4>
+                                <p>Lightweight Python backend with RESTful API endpoints for all detection operations</p>
+                            </div>
+                        </div>
+                        <div class="tech-list-item">
+                            <div class="tech-list-icon"><i class="fas fa-chart-pie"></i></div>
+                            <div>
+                                <h4>Analytics & Reporting</h4>
+                                <p>Chart.js visualizations, SQLite logging, and PDF report generation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="about-card glass-card">
+                    <h2><i class="fas fa-star"></i> Key Features</h2>
+                    <div class="features-list">
+                        <div class="feature-check"><i class="fas fa-check"></i> Real-time webcam mask detection</div>
+                        <div class="feature-check"><i class="fas fa-check"></i> Multi-face detection support</div>
+                        <div class="feature-check"><i class="fas fa-check"></i> Image and video file processing</div>
+                        <div class="feature-check"><i class="fas fa-check"></i> AI confidence scoring</div>
+                        <div class="feature-check"><i class="fas fa-check"></i> Comprehensive analytics dashboard</div>
+                        <div class="feature-check"><i class="fas fa-check"></i> PDF report generation</div>
+                        <div class="feature-check"><i class="fas fa-check"></i> Voice alerts for no-mask detection</div>
+                        <div class="feature-check"><i class="fas fa-check"></i> Auto screenshot capture</div>
+                        <div class="feature-check"><i class="fas fa-check"></i> Dark/Light theme support</div>
+                        <div class="feature-check"><i class="fas fa-check"></i> Responsive mobile-friendly design</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="about-sidebar animate-on-scroll">
+                <div class="about-card glass-card">
+                    <h3><i class="fas fa-database"></i> Model Info</h3>
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span>Architecture</span>
+                            <strong>MobileNetV2</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>Input Size</span>
+                            <strong>224 x 224</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>Classes</span>
+                            <strong>Mask / No Mask</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>Framework</span>
+                            <strong>TensorFlow 2.x</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>Face Detector</span>
+                            <strong>DNN / Haar Cascade</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="about-card glass-card">
+                    <h3><i class="fas fa-link"></i> Resources</h3>
+                    <div class="resource-links">
+                        <a href="https://www.kaggle.com/datasets/ashishjangra27/face-mask-12k-images-dataset" target="_blank" class="resource-link">
+                            <i class="fas fa-external-link-alt"></i> Face Mask Dataset (Kaggle)
+                        </a>
+                        <a href="https://www.tensorflow.org/" target="_blank" class="resource-link">
+                            <i class="fas fa-external-link-alt"></i> TensorFlow Documentation
+                        </a>
+                        <a href="https://docs.opencv.org/" target="_blank" class="resource-link">
+                            <i class="fas fa-external-link-alt"></i> OpenCV Documentation
+                        </a>
+                    </div>
+                </div>
+
+                <div class="about-card glass-card">
+                    <h3><i class="fas fa-user-shield"></i> Admin Access</h3>
+                    <p class="text-muted">Access the analytics dashboard with admin credentials.</p>
+                    <a href="/login" class="btn btn-outline btn-block">
+                        <i class="fas fa-sign-in-alt"></i> Admin Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

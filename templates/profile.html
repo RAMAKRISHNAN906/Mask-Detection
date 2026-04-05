@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container">
+        <div class="page-header animate-on-scroll">
+            <span class="section-badge"><i class="fas fa-user-circle"></i> Account</span>
+            <h1 class="page-title">Your <span class="gradient-text">Profile</span></h1>
+            <p class="page-subtitle">Manage your account settings and preferences</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-messages" style="max-width: 700px; margin: 0 auto 24px;">
+            {% for category, message in messages %}
+            <div class="flash-msg {{ category }}">
+                <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <div class="profile-layout">
+            <!-- Profile Card -->
+            <div class="profile-sidebar animate-on-scroll">
+                <div class="profile-avatar-card glass-card">
+                    <div class="profile-avatar" style="background: {{ user.avatar_color }};">
+                        <span>{{ user.username[0]|upper }}</span>
+                    </div>
+                    <h2 class="profile-name">{{ user.full_name or user.username }}</h2>
+                    <span class="profile-role-badge {{ user.role }}">
+                        <i class="fas fa-{{ 'shield-alt' if user.role == 'admin' else 'user' }}"></i>
+                        {{ user.role|capitalize }}
+                    </span>
+                    <div class="profile-meta">
+                        <div class="profile-meta-item">
+                            <i class="fas fa-at"></i>
+                            <span>{{ user.username }}</span>
+                        </div>
+                        <div class="profile-meta-item">
+                            <i class="fas fa-envelope"></i>
+                            <span>{{ user.email }}</span>
+                        </div>
+                        <div class="profile-meta-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>Joined {{ user.created_at[:10] }}</span>
+                        </div>
+                        {% if user.last_login %}
+                        <div class="profile-meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>Last login: {{ user.last_login }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Forms -->
+            <div class="profile-content animate-on-scroll">
+                <!-- Edit Profile -->
+                <div class="profile-section glass-card">
+                    <div class="profile-section-header">
+                        <h3><i class="fas fa-edit"></i> Edit Profile</h3>
+                    </div>
+                    <form action="{{ url_for('profile_page') }}" method="POST">
+                        <input type="hidden" name="action" value="update_profile">
+                        <div class="form-group">
+                            <label for="full_name">Full Name</label>
+                            <div class="input-icon">
+                                <i class="fas fa-id-card"></i>
+                                <input type="text" id="full_name" name="full_name" value="{{ user.full_name }}" placeholder="Your full name">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <div class="input-icon">
+                                <i class="fas fa-envelope"></i>
+                                <input type="email" id="email" name="email" value="{{ user.email }}" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Change Password -->
+                <div class="profile-section glass-card">
+                    <div class="profile-section-header">
+                        <h3><i class="fas fa-lock"></i> Change Password</h3>
+                    </div>
+                    <form action="{{ url_for('profile_page') }}" method="POST" id="pw-form">
+                        <input type="hidden" name="action" value="change_password">
+                        <div class="form-group">
+                            <label for="current_password">Current Password</label>
+                            <div class="input-icon">
+                                <i class="fas fa-key"></i>
+                                <input type="password" id="current_password" name="current_password" placeholder="Enter current password" required>
+                            </div>
+                        </div>
+                        <div class="form-row-2col">
+                            <div class="form-group">
+                                <label for="new_password">New Password</label>
+                                <div class="input-icon">
+                                    <i class="fas fa-lock"></i>
+                                    <input type="password" id="new_password" name="new_password" placeholder="Min 6 characters" minlength="6" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirm_password">Confirm</label>
+                                <div class="input-icon">
+                                    <i class="fas fa-lock"></i>
+                                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter" minlength="6" required>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-key"></i> Update Password
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Account Info -->
+                <div class="profile-section glass-card">
+                    <div class="profile-section-header">
+                        <h3><i class="fas fa-info-circle"></i> Account Info</h3>
+                    </div>
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span>User ID</span>
+                            <strong>#{{ user.id }}</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>Role</span>
+                            <strong>{{ user.role|capitalize }}</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>Joined</span>
+                            <strong>{{ user.created_at }}</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>Last Login</span>
+                            <strong>{{ user.last_login or 'N/A' }}</strong>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <a href="/logout" class="btn btn-danger">
+                            <i class="fas fa-sign-out-alt"></i> Sign Out
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('pw-form').addEventListener('submit', (e) => {
+    const np = document.getElementById('new_password').value;
+    const cp = document.getElementById('confirm_password').value;
+    if (np !== cp) {
+        e.preventDefault();
+        showToast('New passwords do not match', 'error');
+    }
+});
+</script>
+{% endblock %}

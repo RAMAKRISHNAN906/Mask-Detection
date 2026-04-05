@@ -1,0 +1,10 @@
+flask
+flask-cors
+flask-socketio
+opencv-python-headless
+numpy
+Pillow
+imutils
+reportlab
+gunicorn
+werkzeug

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MaskGuard AI{% endblock %} | Face Mask Detection</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.4/ScrollTrigger.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loader-content">
+            <div class="loader-icon">
+                <div class="scanner-ring"></div>
+                <i class="fas fa-shield-virus"></i>
+            </div>
+            <h2 class="loader-text">MaskGuard AI</h2>
+            <p class="loader-sub">Initializing Detection System...</p>
+            <div class="loader-bar">
+                <div class="loader-bar-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fas fa-shield-virus"></i>
+                <span>MaskGuard</span>
+            </div>
+            <button class="sidebar-close" onclick="toggleSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="/" class="sidebar-link {% if request.endpoint == 'index' %}active{% endif %}">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="/webcam" class="sidebar-link {% if request.endpoint == 'webcam_page' %}active{% endif %}">
+                <i class="fas fa-video"></i>
+                <span>Live Detection</span>
+            </a>
+            <a href="/image" class="sidebar-link {% if request.endpoint == 'image_page' %}active{% endif %}">
+                <i class="fas fa-image"></i>
+                <span>Image Detection</span>
+            </a>
+            <a href="/video" class="sidebar-link {% if request.endpoint == 'video_page' %}active{% endif %}">
+                <i class="fas fa-film"></i>
+                <span>Video Detection</span>
+            </a>
+
+            <div class="sidebar-divider"></div>
+
+            {% if current_user and current_user.role == 'admin' %}
+            <a href="/dashboard" class="sidebar-link {% if request.endpoint == 'dashboard_page' %}active{% endif %}">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            {% endif %}
+            <a href="/about" class="sidebar-link {% if request.endpoint == 'about_page' %}active{% endif %}">
+                <i class="fas fa-info-circle"></i>
+                <span>About</span>
+            </a>
+            <a href="/contact" class="sidebar-link {% if request.endpoint == 'contact_page' %}active{% endif %}">
+                <i class="fas fa-envelope"></i>
+                <span>Contact</span>
+            </a>
+
+            <div class="sidebar-divider"></div>
+
+            {% if current_user %}
+            <a href="/profile" class="sidebar-link {% if request.endpoint == 'profile_page' %}active{% endif %}">
+                <i class="fas fa-user-circle"></i>
+                <span>Profile</span>
+            </a>
+            <a href="/logout" class="sidebar-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Sign Out</span>
+            </a>
+            {% else %}
+            <a href="/login" class="sidebar-link {% if request.endpoint == 'login_page' %}active{% endif %}">
+                <i class="fas fa-sign-in-alt"></i>
+                <span>Login</span>
+            </a>
+            <a href="/register" class="sidebar-link {% if request.endpoint == 'register_page' %}active{% endif %}">
+                <i class="fas fa-user-plus"></i>
+                <span>Register</span>
+            </a>
+            {% endif %}
+        </nav>
+
+        <div class="sidebar-footer">
+            {% if current_user %}
+            <a href="/profile" class="sidebar-user-card">
+                <div class="sidebar-avatar" style="background: {{ current_user.avatar_color }};">
+                    {{ current_user.username[0]|upper }}
+                </div>
+                <div class="sidebar-user-info">
+                    <strong>{{ current_user.full_name or current_user.username }}</strong>
+                    <span>{{ current_user.role|capitalize }}</span>
+                </div>
+            </a>
+            {% endif %}
+            <div class="theme-toggle" onclick="toggleTheme()">
+                <i class="fas fa-moon" id="theme-icon"></i>
+                <span id="theme-label">Dark Mode</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Sidebar Overlay -->
+    <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Main Content -->
+    <div id="main-wrapper">
+        <!-- Top Navbar -->
+        <header class="navbar">
+            <div class="navbar-left">
+                <button class="hamburger" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <a href="/" class="navbar-brand">
+                    <i class="fas fa-shield-virus"></i>
+                    <span>MaskGuard <strong>AI</strong></span>
+                </a>
+            </div>
+
+            <nav class="navbar-center">
+                <a href="/" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">Home</a>
+                <a href="/webcam" class="nav-link {% if request.endpoint == 'webcam_page' %}active{% endif %}">Webcam</a>
+                <a href="/image" class="nav-link {% if request.endpoint == 'image_page' %}active{% endif %}">Image</a>
+                <a href="/video" class="nav-link {% if request.endpoint == 'video_page' %}active{% endif %}">Video</a>
+                <a href="/dashboard" class="nav-link {% if request.endpoint == 'dashboard_page' %}active{% endif %}">Dashboard</a>
+            </nav>
+
+            <div class="navbar-right">
+                <button class="nav-icon-btn" onclick="toggleTheme()" title="Toggle Theme">
+                    <i class="fas fa-adjust"></i>
+                </button>
+                {% if current_user %}
+                <div class="nav-user-menu">
+                    <button class="nav-user-btn" onclick="toggleUserMenu()">
+                        <div class="nav-avatar" style="background: {{ current_user.avatar_color }};">
+                            {{ current_user.username[0]|upper }}
+                        </div>
+                        <span class="nav-username">{{ current_user.username }}</span>
+                        <i class="fas fa-chevron-down nav-chevron"></i>
+                    </button>
+                    <div class="user-dropdown" id="user-dropdown">
+                        <div class="user-dropdown-header">
+                            <div class="nav-avatar" style="background: {{ current_user.avatar_color }};">
+                                {{ current_user.username[0]|upper }}
+                            </div>
+                            <div>
+                                <strong>{{ current_user.full_name or current_user.username }}</strong>
+                                <span>{{ current_user.email }}</span>
+                            </div>
+                        </div>
+                        <div class="user-dropdown-divider"></div>
+                        <a href="/profile" class="user-dropdown-item">
+                            <i class="fas fa-user-circle"></i> Profile
+                        </a>
+                        {% if current_user.role == 'admin' %}
+                        <a href="/dashboard" class="user-dropdown-item">
+                            <i class="fas fa-chart-line"></i> Dashboard
+                        </a>
+                        {% endif %}
+                        <div class="user-dropdown-divider"></div>
+                        <a href="/logout" class="user-dropdown-item logout">
+                            <i class="fas fa-sign-out-alt"></i> Sign Out
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <a href="/login" class="btn btn-sm btn-outline nav-auth-btn">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+                <a href="/register" class="btn btn-sm btn-primary nav-auth-btn">
+                    <i class="fas fa-user-plus"></i> Sign Up
+                </a>
+                {% endif %}
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <i class="fas fa-shield-virus"></i>
+                    <span>MaskGuard AI</span>
+                </div>
+                <p class="footer-text">Advanced Face Mask Detection powered by Deep Learning</p>
+                <div class="footer-links">
+                    <a href="/about">About</a>
+                    <a href="/contact">Contact</a>
+                    <a href="/dashboard">Dashboard</a>
+                </div>
+                <p class="footer-copy">&copy; 2024 MaskGuard AI. Built with TensorFlow & OpenCV.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/animations.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

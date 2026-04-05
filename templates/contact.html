@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Contact{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container">
+        <div class="page-header animate-on-scroll">
+            <span class="section-badge"><i class="fas fa-envelope"></i> Contact</span>
+            <h1 class="page-title">Get In <span class="gradient-text">Touch</span></h1>
+            <p class="page-subtitle">Have questions or feedback? We'd love to hear from you.</p>
+        </div>
+
+        <div class="contact-layout">
+            <div class="contact-form-card glass-card animate-on-scroll">
+                <h2><i class="fas fa-paper-plane"></i> Send a Message</h2>
+                <form id="contact-form" onsubmit="submitContact(event)">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <div class="input-icon">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="name" name="name" placeholder="Your name" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <div class="input-icon">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">Subject</label>
+                        <div class="input-icon">
+                            <i class="fas fa-tag"></i>
+                            <input type="text" id="subject" name="subject" placeholder="What's this about?" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" rows="5" placeholder="Your message..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-glow btn-block">
+                        <i class="fas fa-paper-plane"></i> Send Message
+                    </button>
+                </form>
+            </div>
+
+            <div class="contact-info animate-on-scroll">
+                <div class="contact-card glass-card">
+                    <div class="contact-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3>Location</h3>
+                    <p>AI Research Lab<br>Innovation Center</p>
+                </div>
+                <div class="contact-card glass-card">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h3>Email</h3>
+                    <p>contact@maskguard.ai<br>support@maskguard.ai</p>
+                </div>
+                <div class="contact-card glass-card">
+                    <div class="contact-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>Availability</h3>
+                    <p>24/7 AI Detection<br>Support: Mon-Fri</p>
+                </div>
+
+                <div class="social-links glass-card">
+                    <h3>Follow Us</h3>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function submitContact(e) {
+    e.preventDefault();
+    const form = document.getElementById('contact-form');
+    showToast('Message sent successfully! We\'ll get back to you soon.', 'success');
+    form.reset();
+    gsap.from('.contact-form-card', { scale: 1.02, duration: 0.3, ease: 'power2.out' });
+}
+</script>
+{% endblock %}

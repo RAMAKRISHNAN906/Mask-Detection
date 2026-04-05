@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+{% block title %}Live Detection{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container">
+        <div class="page-header animate-on-scroll">
+            <span class="section-badge"><i class="fas fa-video"></i> Live Feed</span>
+            <h1 class="page-title">Real-Time <span class="gradient-text">Webcam Detection</span></h1>
+            <p class="page-subtitle">Detect face masks in real-time through your browser webcam</p>
+        </div>
+
+        <div class="detection-layout">
+            <!-- Video Panel -->
+            <div class="video-panel glass-card animate-on-scroll">
+                <div class="video-header">
+                    <div class="video-status">
+                        <div class="status-dot" id="cam-status"></div>
+                        <span id="cam-status-text">Camera Off</span>
+                    </div>
+                    <div class="video-fps">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span id="fps-display">0 FPS</span>
+                    </div>
+                </div>
+
+                <!-- Big Status Banner -->
+                <div id="mask-status-banner" class="mask-status-banner hidden">
+                    <div class="banner-inner" id="banner-inner">
+                        <span class="banner-icon" id="banner-icon"></span>
+                        <span class="banner-text" id="banner-text">Detecting...</span>
+                    </div>
+                </div>
+
+                <div class="video-container">
+                    <!-- Live video — always plays at full FPS, never replaced -->
+                    <video id="webcam-video" autoplay playsinline muted style="display:none;"></video>
+                    <!-- Overlay canvas — detection boxes drawn on top of video -->
+                    <canvas id="overlay-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;"></canvas>
+                    <!-- Hidden capture canvas (not in DOM flow) -->
+                    <canvas id="webcam-canvas" style="display:none;"></canvas>
+
+                    <!-- Scanning overlay -->
+                    <div class="scan-overlay" id="scan-overlay">
+                        <div class="scan-line-anim"></div>
+                        <div class="scan-corners">
+                            <div class="scan-corner tl"></div>
+                            <div class="scan-corner tr"></div>
+                            <div class="scan-corner bl"></div>
+                            <div class="scan-corner br"></div>
+                        </div>
+                    </div>
+
+                    <!-- Placeholder -->
+                    <div class="video-placeholder" id="video-placeholder">
+                        <i class="fas fa-video-slash"></i>
+                        <p>Click "Start Camera" to begin</p>
+                    </div>
+                </div>
+
+                <div class="video-controls">
+                    <button class="btn btn-primary btn-glow" id="btn-start" onclick="startCamera()">
+                        <i class="fas fa-play"></i> Start Camera
+                    </button>
+                    <button class="btn btn-danger" id="btn-stop" onclick="stopCamera()" disabled>
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                    <button class="btn btn-outline" id="btn-screenshot" onclick="takeScreenshot()" disabled>
+                        <i class="fas fa-camera"></i> Screenshot
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="results-panel animate-on-scroll">
+                <!-- Stats Cards -->
+                <div class="stats-mini-grid">
+                    <div class="stat-mini glass-card">
+                        <div class="stat-mini-icon" style="--accent: #00f0ff;">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-mini-info">
+                            <span class="stat-mini-value" id="stat-faces">0</span>
+                            <span class="stat-mini-label">Faces</span>
+                        </div>
+                    </div>
+                    <div class="stat-mini glass-card">
+                        <div class="stat-mini-icon" style="--accent: #10b981;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-mini-info">
+                            <span class="stat-mini-value" id="stat-masks">0</span>
+                            <span class="stat-mini-label">Masks</span>
+                        </div>
+                    </div>
+                    <div class="stat-mini glass-card">
+                        <div class="stat-mini-icon" style="--accent: #f43f5e;">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="stat-mini-info">
+                            <span class="stat-mini-value" id="stat-nomasks">0</span>
+                            <span class="stat-mini-label">No Mask</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Confidence Meter -->
+                <div class="confidence-card glass-card">
+                    <h3><i class="fas fa-gauge-high"></i> AI Confidence</h3>
+                    <div class="confidence-meter">
+                        <svg viewBox="0 0 200 120" class="confidence-gauge">
+                            <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="12" stroke-linecap="round"/>
+                            <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#gaugeGradient)" stroke-width="12" stroke-linecap="round" id="confidence-arc" stroke-dasharray="0 251"/>
+                            <defs>
+                                <linearGradient id="gaugeGradient">
+                                    <stop offset="0%" stop-color="#f43f5e"/>
+                                    <stop offset="50%" stop-color="#a855f7"/>
+                                    <stop offset="100%" stop-color="#10b981"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div class="confidence-value" id="confidence-value">0%</div>
+                    </div>
+                </div>
+
+                <!-- Detection Log -->
+                <div class="detection-log glass-card">
+                    <h3><i class="fas fa-list"></i> Live Detection Log</h3>
+                    <div class="log-list" id="detection-log">
+                        <div class="log-empty">
+                            <i class="fas fa-info-circle"></i>
+                            <span>No detections yet</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Voice Alert Toggle -->
+                <div class="toggle-card glass-card">
+                    <div class="toggle-row">
+                        <span><i class="fas fa-volume-up"></i> Voice Alerts</span>
+                        <label class="switch">
+                            <input type="checkbox" id="voice-toggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-row">
+                        <span><i class="fas fa-camera-retro"></i> Auto Screenshot</span>
+                        <label class="switch">
+                            <input type="checkbox" id="screenshot-toggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Generate Report Button -->
+                <div class="glass-card" style="padding:18px;">
+                    <h3 style="margin-bottom:12px;font-size:1rem;">
+                        <i class="fas fa-file-pdf" style="color:var(--accent-danger);"></i> Reports
+                    </h3>
+                    <button class="btn btn-primary btn-glow" id="btn-report"
+                            onclick="generateReport()" style="width:100%;justify-content:center;">
+                        <i class="fas fa-download"></i> Generate PDF Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block head %}
+<style>
+/* ── Mask Status Banner ───────────────────────────────────────── */
+.mask-status-banner {
+    width: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 14px;
+    transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+.mask-status-banner.hidden { display: none; }
+
+.banner-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 18px 24px;
+    border-radius: 14px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    font-size: clamp(1.3rem, 3.5vw, 2rem);
+    box-shadow: 0 6px 32px rgba(0,0,0,0.4);
+    animation: bannerPulse 1.8s ease-in-out infinite;
+}
+
+.banner-inner.mask {
+    background: linear-gradient(135deg, #065f46, #10b981);
+    color: #ecfdf5;
+    border: 2px solid #34d399;
+}
+.banner-inner.no-mask {
+    background: linear-gradient(135deg, #7f1d1d, #ef4444);
+    color: #fff1f2;
+    border: 2px solid #f87171;
+}
+
+.banner-icon {
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+}
+.banner-text {
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+@keyframes bannerPulse {
+    0%, 100% { transform: scale(1);   box-shadow: 0 6px 32px rgba(0,0,0,0.4); }
+    50%       { transform: scale(1.015); box-shadow: 0 8px 40px rgba(0,0,0,0.5); }
+}
+</style>
+{% endblock head %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/webcam.js') }}"></script>
+{% endblock %}

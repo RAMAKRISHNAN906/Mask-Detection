@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip --version:*)",
+      "Bash(pip index:*)",
+      "Bash(python download_face_detector.py:*)",
+      "Bash(timeout:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(tasklist:*)",
+      "Bash(cmd /c \"tasklist /FI \"\"IMAGENAME eq python.exe\"\" /FO CSV\")",
+      "Bash(del \"c:\\\\Users\\\\ramak\\\\Desktop\\\\Face Mask Detection\\\\detection_logs.db\")",
+      "Bash(cmd /c \"taskkill /F /IM python.exe 2>nul & taskkill /F /IM python3.exe 2>nul & echo done\")",
+      "Bash(ping:*)",
+      "Bash(curl:*)"
+    ]
+  }
+}

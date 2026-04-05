@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<section class="page-section auth-section">
+    <div class="container">
+        <div class="auth-wrapper animate-on-scroll">
+            <div class="auth-card glass-card">
+                <!-- Left: Branding Panel -->
+                <div class="auth-branding">
+                    <div class="auth-branding-content">
+                        <i class="fas fa-shield-virus auth-branding-icon"></i>
+                        <h2>Join MaskGuard AI</h2>
+                        <p>Create your free account and start detecting</p>
+                        <div class="auth-branding-features">
+                            <div class="auth-feature"><i class="fas fa-check"></i> Free to use</div>
+                            <div class="auth-feature"><i class="fas fa-check"></i> Instant setup</div>
+                            <div class="auth-feature"><i class="fas fa-check"></i> All detection features</div>
+                            <div class="auth-feature"><i class="fas fa-check"></i> Personal dashboard</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Register Form -->
+                <div class="auth-form-panel">
+                    <div class="auth-form-header">
+                        <h2>Create Account</h2>
+                        <p>Fill in the details below to get started</p>
+                    </div>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                        <div class="flash-msg {{ category }}">
+                            <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+
+                    <form action="{{ url_for('register_page') }}" method="POST" class="auth-form" id="register-form">
+                        <div class="form-group">
+                            <label for="full_name">Full Name</label>
+                            <div class="input-icon">
+                                <i class="fas fa-id-card"></i>
+                                <input type="text" id="full_name" name="full_name" placeholder="John Doe" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <div class="input-icon">
+                                <i class="fas fa-user"></i>
+                                <input type="text" id="username" name="username" placeholder="Choose a username" minlength="3" required>
+                            </div>
+                            <span class="form-hint">At least 3 characters</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <div class="input-icon">
+                                <i class="fas fa-envelope"></i>
+                                <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row-2col">
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <div class="input-icon">
+                                    <i class="fas fa-lock"></i>
+                                    <input type="password" id="password" name="password" placeholder="Min 6 chars" minlength="6" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirm_password">Confirm</label>
+                                <div class="input-icon">
+                                    <i class="fas fa-lock"></i>
+                                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter" minlength="6" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Password strength meter -->
+                        <div class="password-strength" id="pw-strength">
+                            <div class="pw-bar"><div class="pw-fill" id="pw-fill"></div></div>
+                            <span class="pw-label" id="pw-label"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-glow btn-block">
+                            <i class="fas fa-user-plus"></i> Create Account
+                        </button>
+                    </form>
+
+                    <div class="auth-divider"><span>or</span></div>
+
+                    <div class="auth-switch">
+                        <p>Already have an account?</p>
+                        <a href="{{ url_for('login_page') }}" class="btn btn-outline btn-block">
+                            <i class="fas fa-sign-in-alt"></i> Sign In
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const pwInput = document.getElementById('password');
+const pwFill = document.getElementById('pw-fill');
+const pwLabel = document.getElementById('pw-label');
+
+pwInput.addEventListener('input', () => {
+    const val = pwInput.value;
+    let score = 0;
+    if (val.length >= 6) score++;
+    if (val.length >= 10) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+
+    const levels = [
+        { w: '0%', c: '', t: '' },
+        { w: '20%', c: '#f43f5e', t: 'Weak' },
+        { w: '40%', c: '#f59e0b', t: 'Fair' },
+        { w: '60%', c: '#f59e0b', t: 'Good' },
+        { w: '80%', c: '#10b981', t: 'Strong' },
+        { w: '100%', c: '#10b981', t: 'Very Strong' },
+    ];
+    const lvl = levels[Math.min(score, 5)];
+    pwFill.style.width = lvl.w;
+    pwFill.style.background = lvl.c;
+    pwLabel.textContent = lvl.t;
+    pwLabel.style.color = lvl.c;
+});
+
+document.getElementById('register-form').addEventListener('submit', (e) => {
+    const pw = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm_password').value;
+    if (pw !== confirm) {
+        e.preventDefault();
+        showToast('Passwords do not match', 'error');
+    }
+});
+</script>
+{% endblock %}

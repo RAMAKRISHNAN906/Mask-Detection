@@ -1,0 +1,278 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-bg">
+        <div class="hero-gradient"></div>
+        <div class="hero-particles" id="particles"></div>
+        <div class="hero-grid"></div>
+    </div>
+
+    <div class="hero-content animate-on-scroll">
+        <div class="hero-badge">
+            <i class="fas fa-bolt"></i>
+            <span>AI-Powered Detection System</span>
+        </div>
+        <h1 class="hero-title">
+            <span class="gradient-text">Face Mask</span>
+            <br>Detection System
+        </h1>
+        <p class="hero-subtitle">
+            Real-time AI-powered face mask detection using deep learning and computer vision.
+            Protect your community with instant, accurate detection across webcam feeds,
+            images, and video files.
+        </p>
+        <div class="hero-actions">
+            <a href="/webcam" class="btn btn-primary btn-glow btn-lg">
+                <i class="fas fa-video"></i>
+                Start Live Detection
+            </a>
+            <a href="/image" class="btn btn-outline btn-lg">
+                <i class="fas fa-upload"></i>
+                Upload Image
+            </a>
+        </div>
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <span class="hero-stat-number" data-count="99.2">0</span><span>%</span>
+                <span class="hero-stat-label">Accuracy</span>
+            </div>
+            <div class="hero-stat-divider"></div>
+            <div class="hero-stat">
+                <span class="hero-stat-number" data-count="30">0</span><span>+</span>
+                <span class="hero-stat-label">FPS Speed</span>
+            </div>
+            <div class="hero-stat-divider"></div>
+            <div class="hero-stat">
+                <span class="hero-stat-number" data-count="10">0</span><span>+</span>
+                <span class="hero-stat-label">Multi-Face</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-visual animate-on-scroll">
+        <div class="hero-card glass-card">
+            <div class="scan-animation">
+                <div class="scan-line"></div>
+                <div class="face-placeholder">
+                    <i class="fas fa-head-side-mask"></i>
+                </div>
+                <div class="detection-box mask-detected">
+                    <span class="detection-label"><i class="fas fa-check-circle"></i> Mask Detected</span>
+                    <span class="detection-conf">98.7%</span>
+                </div>
+            </div>
+            <div class="hero-card-footer">
+                <div class="status-dot active"></div>
+                <span>AI Detection Active</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="section features-section">
+    <div class="container">
+        <div class="section-header animate-on-scroll">
+            <span class="section-badge">Features</span>
+            <h2 class="section-title">Powerful Detection <span class="gradient-text">Capabilities</span></h2>
+            <p class="section-subtitle">Advanced AI features for comprehensive mask detection across multiple input sources</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card glass-card animate-on-scroll" data-delay="0">
+                <div class="feature-icon-wrap">
+                    <div class="feature-icon" style="--accent: #00f0ff;">
+                        <i class="fas fa-video"></i>
+                    </div>
+                </div>
+                <h3>Real-Time Webcam</h3>
+                <p>Live face mask detection through your webcam with instant bounding boxes and confidence scores.</p>
+                <a href="/webcam" class="feature-link">
+                    Try Now <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="feature-card glass-card animate-on-scroll" data-delay="100">
+                <div class="feature-icon-wrap">
+                    <div class="feature-icon" style="--accent: #a855f7;">
+                        <i class="fas fa-image"></i>
+                    </div>
+                </div>
+                <h3>Image Analysis</h3>
+                <p>Upload images to detect multiple faces simultaneously with downloadable annotated results.</p>
+                <a href="/image" class="feature-link">
+                    Upload Image <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="feature-card glass-card animate-on-scroll" data-delay="200">
+                <div class="feature-icon-wrap">
+                    <div class="feature-icon" style="--accent: #f43f5e;">
+                        <i class="fas fa-film"></i>
+                    </div>
+                </div>
+                <h3>Video Processing</h3>
+                <p>Process video files frame-by-frame with full detection output and downloadable results.</p>
+                <a href="/video" class="feature-link">
+                    Upload Video <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="feature-card glass-card animate-on-scroll" data-delay="300">
+                <div class="feature-icon-wrap">
+                    <div class="feature-icon" style="--accent: #10b981;">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                </div>
+                <h3>Analytics Dashboard</h3>
+                <p>Comprehensive statistics, charts, and detection logs with PDF report generation.</p>
+                <a href="/dashboard" class="feature-link">
+                    View Stats <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="section how-section">
+    <div class="container">
+        <div class="section-header animate-on-scroll">
+            <span class="section-badge">Process</span>
+            <h2 class="section-title">How It <span class="gradient-text">Works</span></h2>
+        </div>
+
+        <div class="steps-timeline">
+            <div class="step-item animate-on-scroll" data-delay="0">
+                <div class="step-number">01</div>
+                <div class="step-content glass-card">
+                    <i class="fas fa-camera"></i>
+                    <h4>Capture</h4>
+                    <p>Input via webcam, image upload, or video file</p>
+                </div>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step-item animate-on-scroll" data-delay="150">
+                <div class="step-number">02</div>
+                <div class="step-content glass-card">
+                    <i class="fas fa-search"></i>
+                    <h4>Face Detection</h4>
+                    <p>OpenCV detects all faces in the frame</p>
+                </div>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step-item animate-on-scroll" data-delay="300">
+                <div class="step-number">03</div>
+                <div class="step-content glass-card">
+                    <i class="fas fa-brain"></i>
+                    <h4>AI Classification</h4>
+                    <p>MobileNetV2 model predicts mask status</p>
+                </div>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step-item animate-on-scroll" data-delay="450">
+                <div class="step-number">04</div>
+                <div class="step-content glass-card">
+                    <i class="fas fa-check-double"></i>
+                    <h4>Results</h4>
+                    <p>Annotated output with bounding boxes and confidence</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Tech Stack Section -->
+<section class="section tech-section">
+    <div class="container">
+        <div class="section-header animate-on-scroll">
+            <span class="section-badge">Technology</span>
+            <h2 class="section-title">Built With <span class="gradient-text">Modern Stack</span></h2>
+        </div>
+
+        <div class="tech-grid animate-on-scroll">
+            <div class="tech-item glass-card">
+                <i class="fab fa-python"></i>
+                <span>Python</span>
+            </div>
+            <div class="tech-item glass-card">
+                <i class="fas fa-fire"></i>
+                <span>TensorFlow</span>
+            </div>
+            <div class="tech-item glass-card">
+                <i class="fas fa-eye"></i>
+                <span>OpenCV</span>
+            </div>
+            <div class="tech-item glass-card">
+                <i class="fas fa-flask"></i>
+                <span>Flask</span>
+            </div>
+            <div class="tech-item glass-card">
+                <i class="fas fa-mobile-alt"></i>
+                <span>MobileNetV2</span>
+            </div>
+            <div class="tech-item glass-card">
+                <i class="fas fa-chart-pie"></i>
+                <span>Chart.js</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="section cta-section">
+    <div class="container">
+        <div class="cta-card glass-card animate-on-scroll">
+            <h2>Ready to Detect?</h2>
+            <p>Start using AI-powered face mask detection right now with your webcam or upload files.</p>
+            <div class="cta-actions">
+                <a href="/webcam" class="btn btn-primary btn-glow btn-lg">
+                    <i class="fas fa-play"></i> Start Detection
+                </a>
+                <a href="/about" class="btn btn-outline btn-lg">
+                    Learn More
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Animate hero stats counting
+    document.querySelectorAll('.hero-stat-number').forEach(el => {
+        const target = parseFloat(el.dataset.count);
+        const isDecimal = target % 1 !== 0;
+        gsap.to(el, {
+            innerHTML: target,
+            duration: 2,
+            delay: 0.5,
+            snap: isDecimal ? { innerHTML: 0.1 } : { innerHTML: 1 },
+            ease: "power2.out"
+        });
+    });
+
+    // Particles
+    createParticles();
+});
+
+function createParticles() {
+    const container = document.getElementById('particles');
+    if (!container) return;
+    for (let i = 0; i < 50; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.top = Math.random() * 100 + '%';
+        p.style.animationDelay = Math.random() * 5 + 's';
+        p.style.animationDuration = (3 + Math.random() * 4) + 's';
+        container.appendChild(p);
+    }
+}
+</script>
+{% endblock %}

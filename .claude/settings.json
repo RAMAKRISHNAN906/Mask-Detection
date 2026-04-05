@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import cv2, numpy as np; print\\('cv2:', cv2.__version__\\); print\\('numpy:', np.__version__\\)\")",
+      "Bash(pkill -f \"python app.py\")",
+      "Bash(jobs -l)",
+      "Bash(python -c \"import reportlab; print\\('reportlab', reportlab.Version\\)\")",
+      "Bash(python -c ':*)",
+      "Bash(winget install:*)"
+    ]
+  }
+}

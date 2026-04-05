@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+{% block title %}Image Detection{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container">
+        <div class="page-header animate-on-scroll">
+            <span class="section-badge"><i class="fas fa-image"></i> Image Analysis</span>
+            <h1 class="page-title">Image <span class="gradient-text">Mask Detection</span></h1>
+            <p class="page-subtitle">Upload an image to detect face masks with multi-face support</p>
+        </div>
+
+        <div class="upload-layout">
+            <!-- Upload Panel -->
+            <div class="upload-panel glass-card animate-on-scroll">
+                <div class="upload-zone" id="drop-zone">
+                    <input type="file" id="image-input" accept=".jpg,.jpeg,.png,.bmp,.webp" hidden>
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h3>Drop Image Here</h3>
+                    <p>or click to browse files</p>
+                    <span class="upload-formats">JPG, PNG, BMP, WebP supported</span>
+                </div>
+
+                <!-- Preview -->
+                <div class="preview-container" id="preview-container" style="display:none;">
+                    <div class="preview-header">
+                        <h3><i class="fas fa-image"></i> Original Image</h3>
+                        <button class="btn btn-sm btn-outline" onclick="clearImage()">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    </div>
+                    <img id="preview-image" alt="Preview">
+                </div>
+
+                <button class="btn btn-primary btn-glow btn-block" id="btn-detect" onclick="detectImage()" disabled>
+                    <i class="fas fa-search"></i> Detect Masks
+                </button>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="result-panel animate-on-scroll">
+                <!-- Loading -->
+                <div class="processing-overlay" id="processing" style="display:none;">
+                    <div class="processing-content glass-card">
+                        <div class="processing-spinner"></div>
+                        <h3>Analyzing Image...</h3>
+                        <p>AI is detecting faces and classifying masks</p>
+                    </div>
+                </div>
+
+                <!-- Result Image -->
+                <div class="result-image-card glass-card" id="result-card" style="display:none;">
+                    <div class="result-header">
+                        <h3><i class="fas fa-check-double"></i> Detection Result</h3>
+                        <div class="result-actions">
+                            <a id="download-btn" class="btn btn-sm btn-primary" download>
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                        </div>
+                    </div>
+                    <img id="result-image" alt="Result">
+                </div>
+
+                <!-- Stats -->
+                <div class="result-stats" id="result-stats" style="display:none;">
+                    <div class="stat-mini glass-card">
+                        <div class="stat-mini-icon" style="--accent: #00f0ff;">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-mini-info">
+                            <span class="stat-mini-value" id="img-faces">0</span>
+                            <span class="stat-mini-label">Faces Found</span>
+                        </div>
+                    </div>
+                    <div class="stat-mini glass-card">
+                        <div class="stat-mini-icon" style="--accent: #10b981;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-mini-info">
+                            <span class="stat-mini-value" id="img-masks">0</span>
+                            <span class="stat-mini-label">With Mask</span>
+                        </div>
+                    </div>
+                    <div class="stat-mini glass-card">
+                        <div class="stat-mini-icon" style="--accent: #f43f5e;">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="stat-mini-info">
+                            <span class="stat-mini-value" id="img-nomasks">0</span>
+                            <span class="stat-mini-label">No Mask</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detections List -->
+                <div class="detections-list glass-card" id="detections-list" style="display:none;">
+                    <h3><i class="fas fa-list-ul"></i> Detection Details</h3>
+                    <div id="detections-items"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const dropZone = document.getElementById('drop-zone');
+const imageInput = document.getElementById('image-input');
+const previewContainer = document.getElementById('preview-container');
+const previewImage = document.getElementById('preview-image');
+const btnDetect = document.getElementById('btn-detect');
+let selectedFile = null;
+
+// Click to upload
+dropZone.addEventListener('click', () => imageInput.click());
+
+// Drag and drop
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+});
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    if (e.dataTransfer.files.length) {
+        handleFile(e.dataTransfer.files[0]);
+    }
+});
+
+imageInput.addEventListener('change', (e) => {
+    if (e.target.files.length) handleFile(e.target.files[0]);
+});
+
+function handleFile(file) {
+    if (!file.type.startsWith('image/')) {
+        showToast('Please select a valid image file', 'error');
+        return;
+    }
+    selectedFile = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        previewImage.src = e.target.result;
+        previewContainer.style.display = 'block';
+        dropZone.style.display = 'none';
+        btnDetect.disabled = false;
+
+        gsap.from(previewContainer, { opacity: 0, y: 20, duration: 0.5 });
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearImage() {
+    selectedFile = null;
+    previewContainer.style.display = 'none';
+    dropZone.style.display = 'flex';
+    btnDetect.disabled = true;
+    document.getElementById('result-card').style.display = 'none';
+    document.getElementById('result-stats').style.display = 'none';
+    document.getElementById('detections-list').style.display = 'none';
+    imageInput.value = '';
+}
+
+async function detectImage() {
+    if (!selectedFile) return;
+
+    const processing = document.getElementById('processing');
+    processing.style.display = 'flex';
+    btnDetect.disabled = true;
+
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
+    try {
+        const response = await fetch('/api/detect/image', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+        processing.style.display = 'none';
+
+        if (data.error) {
+            showToast(data.error, 'error');
+            btnDetect.disabled = false;
+            return;
+        }
+
+        // Show result image
+        const resultCard = document.getElementById('result-card');
+        const resultImg = document.getElementById('result-image');
+        resultImg.src = data.image;
+        resultCard.style.display = 'block';
+        document.getElementById('download-btn').href = data.download_url;
+
+        // Show stats
+        const statsEl = document.getElementById('result-stats');
+        document.getElementById('img-faces').textContent = data.total_faces;
+        document.getElementById('img-masks').textContent = data.mask_count;
+        document.getElementById('img-nomasks').textContent = data.no_mask_count;
+        statsEl.style.display = 'grid';
+
+        // Detection details
+        const listEl = document.getElementById('detections-list');
+        const itemsEl = document.getElementById('detections-items');
+        itemsEl.innerHTML = '';
+
+        if (data.detections.length === 0) {
+            itemsEl.innerHTML = '<p class="text-muted">No faces detected in this image</p>';
+        } else {
+            data.detections.forEach((d, i) => {
+                const item = document.createElement('div');
+                item.className = `detection-item ${d.has_mask ? 'mask' : 'no-mask'}`;
+                item.innerHTML = `
+                    <div class="detection-item-icon">
+                        <i class="fas fa-${d.has_mask ? 'check-circle' : 'exclamation-triangle'}"></i>
+                    </div>
+                    <div class="detection-item-info">
+                        <span class="detection-item-label">Face ${i + 1}: ${d.label}</span>
+                        <span class="detection-item-conf">Confidence: ${d.confidence}%</span>
+                    </div>
+                `;
+                itemsEl.appendChild(item);
+            });
+        }
+        listEl.style.display = 'block';
+
+        // Animations
+        gsap.from(resultCard, { opacity: 0, y: 30, duration: 0.6 });
+        gsap.from(statsEl.children, { opacity: 0, y: 20, duration: 0.4, stagger: 0.1, delay: 0.3 });
+        gsap.from(listEl, { opacity: 0, y: 20, duration: 0.5, delay: 0.5 });
+
+        showToast(`Detected ${data.total_faces} face(s) - ${data.mask_count} masked, ${data.no_mask_count} unmasked`, 'success');
+
+    } catch (err) {
+        processing.style.display = 'none';
+        showToast('Detection failed: ' + err.message, 'error');
+    }
+    btnDetect.disabled = false;
+}
+</script>
+{% endblock %}
